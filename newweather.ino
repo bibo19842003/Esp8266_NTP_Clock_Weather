@@ -44,7 +44,6 @@ See more at https://thingpulse.com
 #include "WeatherStationFonts.h"
 #include "WeatherStationImages.h"
 
-
 /***************************
  * Begin Settings
  **************************/
@@ -63,10 +62,19 @@ const int UPDATE_CURR_INTERVAL_SECS = 10; // Update every 10 secs DS18B20
 // Display Settings
 // config
 const int I2C_DISPLAY_ADDRESS = 0x3c;
-#if defined(ESP8266)
 const int SDA_PIN = D2;
 const int SDC_PIN = D1;
-#endif
+
+// button
+// config
+int button_wifi = D3;
+
+unsigned long btn_time_s = 0;
+unsigned long btn_time_e = 0;
+unsigned long btn_time_dur = 0;
+int wifi_status_old = 0;
+int wifi_pin_lh = 0;
+int temp_wifi = 0;
 
 
 const String WDAY_NAMES[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -173,7 +181,6 @@ void HandleWifi() {
     Serial.println("received:"+wifis);
     server.send(200, "text/html", "连接中..");
     WiFi.begin(wifis,wifip);
-    
 }
 
 void handleNotFound() { 
@@ -284,7 +291,8 @@ void setup() {
     Serial.println("");
     configTime(TZ_SEC, DST_SEC, "pool.ntp.org","0.cn.pool.ntp.org","1.cn.pool.ntp.org");
     updateData(&display);
-
+   
+    pinMode(button_wifi, INPUT); // 按钮输入
 }
 
 
@@ -313,6 +321,35 @@ void loop() {
     // time budget.
         delay(remainingTimeBudget);
     }
+
+// wifi 按钮超过5s清除密码
+    temp_wifi = digitalRead(button_wifi);
+    if (temp_wifi == HIGH) {
+        wifi_pin_lh = 1;
+        if (wifi_status_old == 0){
+            wifi_status_old =1;
+            btn_time_s = millis();
+        }
+    }
+    else {
+        if (wifi_pin_lh ==1) {
+            btn_time_e = millis();
+            btn_time_dur = btn_time_e - btn_time_s;
+
+            if (btn_time_dur > 5000) {
+                Serial.println("it is clearing wifi passwd now !!!");
+                Serial.println("it is clearing wifi passwd now !!!");
+                Serial.println("it is clearing wifi passwd now !!!");
+                Serial.println(btn_time_dur);
+                WiFi.disconnect(true);
+                delay(3000);
+                Serial.println("it will restart!!!");
+                ESP.restart();
+                //ESP.reset();
+            }
+        }
+    }
+
 
 }
 
