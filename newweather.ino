@@ -63,11 +63,11 @@ const int UPDATE_CURR_INTERVAL_SECS = 10; // Update every 10 secs DS18B20
 // config
 const int I2C_DISPLAY_ADDRESS = 0x3c;
 const int SDA_PIN = D2;
-const int SDC_PIN = D1;
+const int SCL_PIN = D1;
 
 // button
 // config
-int button_wifi = D3;
+int button_wifi = D6;
 
 unsigned long btn_time_s = 0;
 unsigned long btn_time_e = 0;
@@ -86,7 +86,7 @@ const String MONTH_NAMES[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "
 
 // Initialize the oled display for address 0x3c
 // sda-pin=14 and sdc-pin=12
-SSD1306Wire     display(I2C_DISPLAY_ADDRESS, SDA_PIN, SDC_PIN);   // or SSD1306Wire  display(I2C_DISPLAY_ADDRESS, SDA_PIN, SDC_PIN);
+SSD1306Wire     display(I2C_DISPLAY_ADDRESS, SDA_PIN, SCL_PIN);   // or SSD1306Wire  display(I2C_DISPLAY_ADDRESS, SDA_PIN, SCL_PIN);
 OLEDDisplayUi   ui( &display );
 
 HeFengCurrentData currentWeather;
@@ -113,6 +113,7 @@ long timeSinceLastWUpdate = 0;
 long timeSinceLastCurrUpdate = 0;
 
 String currTemp="-1.0";
+float val = 0 ;
 //declaring prototypes
 void drawProgress(OLEDDisplay *display, int percentage, String label);
 void updateData(OLEDDisplay *display);
@@ -354,7 +355,9 @@ void loop() {
     
     if (millis() - timeSinceLastCurrUpdate > (1000L*UPDATE_CURR_INTERVAL_SECS)) {
         if( ui.getUiState()->frameState == FIXED) {
-//            currTemp=String(ds.getTempC(), 1);
+              val = analogRead(A0);    //读取AD值
+  //            currTemp = val * 0.1;     //计算温度值
+              currTemp=String(val * 0.1, 1);
             timeSinceLastCurrUpdate = millis();
         }
     }
