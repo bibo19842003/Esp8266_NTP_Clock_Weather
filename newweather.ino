@@ -65,17 +65,6 @@ const int I2C_DISPLAY_ADDRESS = 0x3c;
 const int SDA_PIN = D2;
 const int SCL_PIN = D1;
 
-// button
-// config
-int button_wifi = D6;
-
-unsigned long btn_time_s = 0;
-unsigned long btn_time_e = 0;
-unsigned long btn_time_dur = 0;
-int wifi_status_old = 0;
-int wifi_pin_lh = 0;
-int temp_wifi = 0;
-
 
 const String WDAY_NAMES[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 const String MONTH_NAMES[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -100,8 +89,8 @@ HeFeng HeFengClient;
 #define TZ_SEC          ((TZ)*3600)
 #define DST_SEC         ((DST_MN)*60)
 
-const char* HEFENG_KEY="";
-const char* HEFENG_LOCATION="";
+const char* HEFENG_KEY="1bb67849d4bf4b2e8c73afa08b66d19e";
+const char* HEFENG_LOCATION="101010100";
 time_t now;
 
 // flag changed in the ticker function every 10 minutes
@@ -357,7 +346,7 @@ void loop() {
         if( ui.getUiState()->frameState == FIXED) {
               val = analogRead(A0);    //读取AD值
   //            currTemp = val * 0.1;     //计算温度值
-              currTemp=String(val * 0.1, 1);
+              currTemp=String(val * 5/10.24, 1);
             timeSinceLastCurrUpdate = millis();
         }
     }
@@ -375,33 +364,6 @@ void loop() {
         delay(remainingTimeBudget);
     }
 
-// wifi 按钮超过5s清除密码
-    temp_wifi = digitalRead(button_wifi);
-    if (temp_wifi == HIGH) {
-        wifi_pin_lh = 1;
-        if (wifi_status_old == 0){
-            wifi_status_old =1;
-            btn_time_s = millis();
-        }
-    }
-    else {
-        if (wifi_pin_lh ==1) {
-            btn_time_e = millis();
-            btn_time_dur = btn_time_e - btn_time_s;
-
-            if (btn_time_dur > 5000) {
-                Serial.println("it is clearing wifi passwd now !!!");
-                Serial.println("it is clearing wifi passwd now !!!");
-                Serial.println("it is clearing wifi passwd now !!!");
-                Serial.println(btn_time_dur);
-                WiFi.disconnect(true);
-                delay(3000);
-                Serial.println("it will restart!!!");
-                ESP.restart();
-                //ESP.reset();
-            }
-        }
-    }
 
 
 }
